@@ -1,0 +1,48 @@
+---
+title: "p8105_hw2_xw2757"
+output: github_document
+---
+```{r}
+library(tidyverse)
+library(readxl)
+```
+##Problem 1
+**Loading and cleaning data**
+```{r}
+mtw_df <- 
+  read_excel("TW_data.xlsx", sheet = "Mr. Trash Wheel", skip = 1, ) %>% 
+  janitor::clean_names() %>% 
+  filter(dumpster != "") %>% 
+  select(dumpster:homes_powered)
+
+mtw_df$sports_balls <- round(mtw_df$sports_balls)  
+```
+
+
+
+```{r}
+p2019_df <- 
+  read_excel("TW_data.xlsx", sheet = "2019 Precipitation", skip = 1, ) %>% 
+  janitor::clean_names() %>% 
+  na.omit() %>% 
+  mutate(year = "2019") %>% 
+  rename(prcp = total)
+
+p2018_df <- 
+  read_excel("TW_data.xlsx", sheet = "2018 Precipitation", skip = 1, ) %>% 
+  janitor::clean_names() %>% 
+  na.omit() %>% 
+  mutate(year = "2018") %>% 
+  rename(prcp = total)
+
+prcp_df <-  
+  bind_rows(p2018_df, p2019_df)
+
+prcp_df %>% 
+  mutate(month = month.name[month])
+```
+
+**Describing data**
+In data set "Mr. Trash Wheel", the variables descirbed are as followed: `r names(mtw_df)`. 
+In dataset 2018 precipitation data, there are a total of `r nrow(p2018_df)` observations. The mean precipitation in 2018 is `r mean(pull(prcp_df, prcp))`, and the median is `r median(pull(prcp_df, prcp))`. 
+
