@@ -80,3 +80,22 @@ full_df <-
 
 The data set "full_df" describes informations compiled from data sets "snp", "unemply", and "pols_month". There are a total of `r nrow(full_df)` observations. "snp" contains information on S&P close number. "unemply" contains employment rate. "pols_month" contains information on the dem and gop number of representatives. The final data set contains data from year `r min(pull(full_df, year))` to `r max(pull(full_df, year))`. 
 
+
+##Probelm 3
+**Import data**
+```{r}
+baby_names <- 
+  read_csv(file = "Popular_Baby_Names.csv", col_types ="iffcii") %>% 
+  janitor::clean_names()
+
+str(baby_names)
+levels(baby_names$gender)
+levels(baby_names$ethnicity)
+
+baby_names %>% 
+  mutate(ethnicity = replace(ethnicity, ethnicity == "ASIAN AND PACIFIC ISLANDER", "ASIAN AND PACI"),
+         ethnicity = replace(ethnicity, ethnicity == "BLACK NON HISPANIC", "BLACK NON HISP"),
+         ethnicity = replace(ethnicity, ethnicity == "WHITE NON HISPANIC", "WHITE NON HISP")) %>% 
+  distinct(childs_first_name, year_of_birth, .keep_all = TRUE)
+```
+
