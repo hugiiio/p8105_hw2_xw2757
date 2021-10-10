@@ -89,7 +89,8 @@ baby_names <-
   janitor::clean_names() %>% 
    mutate(ethnicity = replace(ethnicity, ethnicity == "ASIAN AND PACIFIC ISLANDER", "ASIAN AND PACI"),
          ethnicity = replace(ethnicity, ethnicity == "BLACK NON HISPANIC", "BLACK NON HISP"),
-         ethnicity = replace(ethnicity, ethnicity == "WHITE NON HISPANIC", "WHITE NON HISP")) %>% 
+         ethnicity = replace(ethnicity, ethnicity == "WHITE NON HISPANIC", "WHITE NON HISP"),
+         childs_first_name = str_to_lower(childs_first_name)) %>% 
   distinct(childs_first_name, year_of_birth,ethnicity, .keep_all = TRUE)
 
 ```
@@ -97,9 +98,11 @@ baby_names <-
 
 ```{r}
 olivia_rank <- 
-  filter(baby_names, childs_first_name == "Olivia") %>%
+  filter(baby_names, childs_first_name == "olivia") %>%
   select(year_of_birth, gender, ethnicity, rank ) %>% 
   pivot_wider(names_from = "year_of_birth", values_from = "rank")
+
+olivia_rank
 ```
 
 **Male name over time**
@@ -109,6 +112,7 @@ male_rank <-
   select(year_of_birth, ethnicity, childs_first_name, rank) %>% 
   pivot_wider(names_from = "year_of_birth", values_from = "rank")
   
+male_rank
 ```
 
 **scatter plot**
@@ -116,12 +120,19 @@ male_rank <-
 ```{r}
 
 wtnonhisp_2016 <- 
-  filter(baby_names, ethnicity == "WHITE NON HISP", gender == "MALE") %>% 
-  select(year_of_birth, childs_first_name,  )
+  filter(baby_names, ethnicity == "WHITE NON HISP", gender == "MALE", year_of_birth == "2016") %>% 
+  select(year_of_birth, childs_first_name, count, rank )
 
+wtnonhisp_2016_plot <- 
 wtnonhisp_2016 %>% 
-  ggplot(aes(x = rank, y = )) +
-  geom_point(alpha = .5)
+  ggplot(aes(x = rank, y = count)) +
+  geom_point(alpha = .5) + 
+  labs(
+    title = "Names of White Non Hispanic Male Born in 2016",
+    x = "Number of children with a name ",
+    y = "Rank in popularity of that name"
+  )
 
+wtnonhisp_2016_plot
 ```
 
