@@ -12,10 +12,9 @@ library(readxl)
 mtw_df <- 
   read_excel("TW_data.xlsx", sheet = "Mr. Trash Wheel", skip = 1, ) %>% 
   janitor::clean_names() %>% 
-  filter(dumpster != "") %>% 
-  select(dumpster:homes_powered)
-
-mtw_df$sports_balls <- round(mtw_df$sports_balls)  
+  filter(dumpster != "" , dumpster != "Grand Total") %>% 
+  select(dumpster:homes_powered) %>% 
+  mutate(month = factor(month), year = factor(year), dumpster = as.numeric(dumpster), sports_balls = round(sports_balls, digit = 0))
 ```
 
 
@@ -43,6 +42,41 @@ prcp_df %>%
 ```
 
 **Describing data**
-In data set "Mr. Trash Wheel", the variables descirbed are as followed: `r names(mtw_df)`. 
-In dataset 2018 precipitation data, there are a total of `r nrow(p2018_df)` observations. The mean precipitation in 2018 is `r mean(pull(prcp_df, prcp))`, and the median is `r median(pull(prcp_df, prcp))`. 
+In data set "Mr. Trash Wheel", the variables descirbed are as followed: `r names(mtw_df)`. There is a total number of `r nrow(mtw_df)` from the following years: `r levels(pull(mtw_df, year))`. Of all the trash categories, total number of sports balls picked up is `r sum(pull(mtw_df, sports_balls))`, the mean number is `r mean(pull(mtw_df, sports_balls))`, and the median is `r median(pull(mtw_df, sports_balls))`.
+
+
+In precipitation data set, there are a total of `r nrow(prcp_df)` observations. The mean precipitation in 2018 is `r mean(pull(p2018_df, prcp))`, and the median is `r median(pull(p2018_df, prcp))`. The mean precipitation in 2019 is `r mean(pull(p2019_df, prcp))`, and the median is `r median(pull(p2019_df, prcp))`. Total precipitation in 2018 is `r sum(pull(p2018_df, prcp))`.
+
+##Problem 2
+
+**Importing and merging data**
+```{r}
+pols_month <- 
+  read_csv(file = "fivethirtyeight_datasets/pols-month.csv") %>% 
+  separate(mon, c("year", "month", "day"), sep = "-" , convert = TRUE) %>% 
+  mutate(month = month.abb[month], 
+         president = ifelse(prez_dem == 1, "dem", "gop")) %>% 
+  select(-day, -prez_dem, -prez_gop)
+         
+snp <- 
+  read_csv(file = "fivethirtyeight_datasets/snp.csv") %>% 
+  separate(date, c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = ifelse(year <= "15" ,  paste0("20", year), paste0("19", year)), month = as.numeric(month)) %>% 
+  arrange(year, month) %>% 
+  mutate(month = month.abb[month], year = as.numeric(year)) %>% 
+  select(-day)
+  
+
+unemply <- 
+  read_csv(file = "fivethirtyeight_datasets/unemployment.csv") %>% 
+  pivot_longer(Jan:Dec, names_to = "month", values_to = "unemployment")
+  
+snp_pols <- 
+  left_join(pols_month, snp, by = c("year" = "year" , "month" = "month"))
+
+full_df <- 
+  left_join(snp_pols, unemply, by = c("year" = "Year" , "month" = "month"))
+```
+
+The data set "full_df" describes informations compiled from data sets "snp", "unemply", and "pols_month". There are a total of `r nrow(full_df)` observations. "snp" contains information on S&P close number. "unemply" contains employment rate. "pols_month" contains information on the dem and gop number of representatives. The final data set contains data from year `r min(pull(full_df, year))` to `r max(pull(full_df, year))`. 
 
