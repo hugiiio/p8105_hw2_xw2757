@@ -85,17 +85,43 @@ The data set "full_df" describes informations compiled from data sets "snp", "un
 **Import data**
 ```{r}
 baby_names <- 
-  read_csv(file = "Popular_Baby_Names.csv", col_types ="iffcii") %>% 
-  janitor::clean_names()
-
-str(baby_names)
-levels(baby_names$gender)
-levels(baby_names$ethnicity)
-
-baby_names %>% 
-  mutate(ethnicity = replace(ethnicity, ethnicity == "ASIAN AND PACIFIC ISLANDER", "ASIAN AND PACI"),
+  read_csv(file = "Popular_Baby_Names.csv", col_type = "fffcii") %>% 
+  janitor::clean_names() %>% 
+   mutate(ethnicity = replace(ethnicity, ethnicity == "ASIAN AND PACIFIC ISLANDER", "ASIAN AND PACI"),
          ethnicity = replace(ethnicity, ethnicity == "BLACK NON HISPANIC", "BLACK NON HISP"),
          ethnicity = replace(ethnicity, ethnicity == "WHITE NON HISPANIC", "WHITE NON HISP")) %>% 
-  distinct(childs_first_name, year_of_birth, .keep_all = TRUE)
+  distinct(childs_first_name, year_of_birth,ethnicity, .keep_all = TRUE)
+
+```
+**Olivia Ranking**
+
+```{r}
+olivia_rank <- 
+  filter(baby_names, childs_first_name == "Olivia") %>%
+  select(year_of_birth, gender, ethnicity, rank ) %>% 
+  pivot_wider(names_from = "year_of_birth", values_from = "rank")
+```
+
+**Male name over time**
+```{r}
+male_rank <- 
+  filter(baby_names, gender == "MALE") %>% 
+  select(year_of_birth, ethnicity, childs_first_name, rank) %>% 
+  pivot_wider(names_from = "year_of_birth", values_from = "rank")
+  
+```
+
+**scatter plot**
+
+```{r}
+
+wtnonhisp_2016 <- 
+  filter(baby_names, ethnicity == "WHITE NON HISP", gender == "MALE") %>% 
+  select(year_of_birth, childs_first_name,  )
+
+wtnonhisp_2016 %>% 
+  ggplot(aes(x = rank, y = )) +
+  geom_point(alpha = .5)
+
 ```
 
